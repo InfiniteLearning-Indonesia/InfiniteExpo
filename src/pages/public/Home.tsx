@@ -53,8 +53,8 @@ const scaleUp = {
 const stats = [
   { icon: Users, value: "500+", label: "Mentees" },
   { icon: Rocket, value: "150+", label: "Projects" },
-  { icon: Trophy, value: "50+", label: "Awards" },
-  { icon: GraduationCap, value: "12", label: "Batches" },
+  { icon: Trophy, value: "20+", label: "Awards" },
+  { icon: GraduationCap, value: "9", label: "Batches" },
 ];
 
 // Features Data
@@ -432,7 +432,7 @@ export default function Home() {
                         {project.is_best_product && (
                           <Badge className="absolute top-4 right-4 bg-yellow-500/90 text-black border-0 flex gap-1 items-center">
                             <Trophy className="w-3 h-3" />
-                            Top {project.best_product_rank || "Ranked"}
+                            Best Product
                           </Badge>
                         )}
                       </div>
@@ -620,6 +620,12 @@ export default function Home() {
               >
                 Projects
               </a>
+              <Link
+                to="/admin"
+                className="hover:text-white transition-colors"
+              >
+                Admin Panel
+              </Link>
             </div>
           </div>
 

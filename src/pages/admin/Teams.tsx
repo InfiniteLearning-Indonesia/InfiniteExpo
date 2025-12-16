@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getAllTeams, getTeamById, type Team } from "../../api/team.api";
+import { getAllTeams, getTeamById, deleteTeam, type Team } from "../../api/team.api";
 import { getAllBatches, type Batch } from "../../api/batch.api";
 import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
@@ -22,26 +22,36 @@ import {
     FolderKanban,
     GraduationCap,
     Crown,
+    Linkedin,
+    Trash2,
 } from "lucide-react";
 
 const roleLabels: Record<string, string> = {
     hustler: "Hustler / PM",
     hacker: "Hacker",
-    scrum_master: "Scrum Master",
+    hipster: "Hipster",
     design_researcher: "Design Researcher",
     data_engineer: "Data Engineer",
     ml_engineer: "ML Engineer",
     ml_ops: "ML Ops",
+    game_designer: "Game Designer",
+    game_artist: "Game Artist",
+    game_programmer: "Game Programmer",
+    scrum_master: "Scrum Master",
 };
 
 const roleColors: Record<string, string> = {
     hustler: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
     hacker: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    scrum_master: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    design_researcher: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    hipster: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    design_researcher: "bg-rose-500/20 text-rose-400 border-rose-500/30",
     data_engineer: "bg-green-500/20 text-green-400 border-green-500/30",
     ml_engineer: "bg-orange-500/20 text-orange-400 border-orange-500/30",
     ml_ops: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    game_designer: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    game_artist: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    game_programmer: "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    scrum_master: "bg-amber-500/20 text-amber-400 border-amber-500/30",
 };
 
 export default function AdminTeams() {
@@ -91,6 +101,27 @@ export default function AdminTeams() {
             console.error(err);
         } finally {
             setIsLoadingTeam(false);
+        }
+    };
+
+    const handleDeleteTeam = async (teamId: number, teamName: string) => {
+        if (!confirm(`Are you sure you want to delete team "${teamName}"? This will also delete the associated project and all team members. This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            await deleteTeam(teamId);
+            // Refresh teams list
+            const teamsRes = await getAllTeams(selectedBatch || undefined);
+            setTeams(teamsRes.data);
+            // Close expanded view if it was the deleted team
+            if (expandedTeam === teamId) {
+                setExpandedTeam(null);
+                setExpandedTeamData(null);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to delete team");
         }
     };
 
@@ -222,12 +253,24 @@ export default function AdminTeams() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <motion.div
-                                            animate={{ rotate: expandedTeam === team.id ? 180 : 0 }}
-                                            transition={{ duration: 0.2 }}
-                                        >
-                                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                                        </motion.div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteTeam(team.id, team.team_name);
+                                                }}
+                                                className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                                                title="Delete team"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                            <motion.div
+                                                animate={{ rotate: expandedTeam === team.id ? 180 : 0 }}
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                                            </motion.div>
+                                        </div>
                                     </div>
 
                                     {/* Expanded Members Section */}
@@ -257,10 +300,15 @@ export default function AdminTeams() {
                                                                 className="p-4 rounded-xl bg-white/5 border border-white/10"
                                                             >
                                                                 <div className="flex items-start justify-between mb-2">
-                                                                    <p className="font-medium">{member.name}</p>
-                                                                    {member.is_scrum_master && (
-                                                                        <Crown className="w-4 h-4 text-yellow-400" />
-                                                                    )}
+                                                                    <div className="flex items-center gap-2">
+                                                                        <p className="font-medium">{member.name}</p>
+                                                                        {/* Crown for Hustler/PM */}
+                                                                        {member.role === "hustler" && (
+                                                                            <div title="Hustler/PM">
+                                                                                <Crown className="w-4 h-4 text-yellow-400" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                                 <Badge
                                                                     className={
@@ -270,6 +318,18 @@ export default function AdminTeams() {
                                                                 >
                                                                     {roleLabels[member.role] || member.role}
                                                                 </Badge>
+                                                                {/* LinkedIn URL */}
+                                                                {member.linkedin_url && (
+                                                                    <a
+                                                                        href={member.linkedin_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="mt-2 inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"
+                                                                    >
+                                                                        <Linkedin className="w-3 h-3" />
+                                                                        LinkedIn
+                                                                    </a>
+                                                                )}
                                                             </div>
                                                         ))}
                                                     </div>

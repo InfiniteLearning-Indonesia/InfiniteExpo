@@ -8,6 +8,7 @@ import {
     categoryLabels,
     type ProjectCategory,
 } from "../../api/project.api";
+import { programLabels, allPrograms, type MenteeProgram } from "../../api/mentee.api";
 import { getAllBatches, getActiveBatch, type Batch } from "../../api/batch.api";
 import { Card, CardContent } from "../../components/ui/card";
 import {
@@ -29,23 +30,30 @@ import {
     Trash2,
     Crown,
     Users,
+    Linkedin,
 } from "lucide-react";
 
 interface TeamMemberInput {
     id?: number;
     name: string;
     role: string;
-    is_scrum_master: boolean;
+    program: MenteeProgram;
+    linkedin_url?: string;
 }
 
 // All available roles for team members
-const allRoles = [
+const roleOptions: { value: string; label: string }[] = [
     { value: "hustler", label: "Hustler / PM" },
     { value: "hacker", label: "Hacker" },
+    { value: "hipster", label: "Hipster" },
     { value: "design_researcher", label: "Design Researcher" },
     { value: "data_engineer", label: "Data Engineer" },
     { value: "ml_engineer", label: "ML Engineer" },
     { value: "ml_ops", label: "ML Ops" },
+    { value: "game_designer", label: "Game Designer" },
+    { value: "game_artist", label: "Game Artist" },
+    { value: "game_programmer", label: "Game Programmer" },
+    { value: "scrum_master", label: "Scrum Master" },
 ];
 
 export default function ProjectForm() {
@@ -62,14 +70,15 @@ export default function ProjectForm() {
         title: "",
         description: "",
         big_idea: "",
-        category: "web_only" as ProjectCategory | string,
+        category: "web_dev" as ProjectCategory | string,
         frontend_demo: "",
         repository: "",
+        ai_technology: "",
+        showcase_video: "",
         batch: "",
-        team_name: "", // Team name is now required input
+        team_name: "",
         is_published: false,
         is_best_product: false,
-        best_product_rank: "",
     });
 
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
@@ -100,16 +109,15 @@ export default function ProjectForm() {
                     title: project.title || "",
                     description: project.description || "",
                     big_idea: project.big_idea || "",
-                    category: project.category || "non-merge",
+                    category: project.category || "web_dev",
                     frontend_demo: project.frontend_demo || "",
                     repository: project.repository || "",
+                    ai_technology: project.ai_technology || "",
+                    showcase_video: project.showcase_video || "",
                     batch: project.batch ? String(project.batch) : "",
                     team_name: project.team_name || "",
                     is_published: project.is_published || false,
                     is_best_product: project.is_best_product || false,
-                    best_product_rank: project.best_product_rank
-                        ? String(project.best_product_rank)
-                        : "",
                 });
 
                 if (project.thumbnail) {
@@ -126,7 +134,8 @@ export default function ProjectForm() {
                             id: m.id,
                             name: m.name,
                             role: m.role,
-                            is_scrum_master: m.is_scrum_master,
+                            program: (m.program || "web_uiux") as MenteeProgram,
+                            linkedin_url: m.linkedin_url || "",
                         }))
                     );
                 }
@@ -158,7 +167,7 @@ export default function ProjectForm() {
     const addTeamMember = () => {
         setTeamMembers([
             ...teamMembers,
-            { name: "", role: "hacker", is_scrum_master: false },
+            { name: "", role: "hacker", program: "web_uiux" },
         ]);
     };
 
@@ -173,12 +182,6 @@ export default function ProjectForm() {
     ) => {
         const updated = [...teamMembers];
         updated[index] = { ...updated[index], [field]: value };
-
-        // Hustler cannot be scrum master
-        if (field === "role" && value === "hustler") {
-            updated[index].is_scrum_master = false;
-        }
-
         setTeamMembers(updated);
     };
 
@@ -214,13 +217,12 @@ export default function ProjectForm() {
             data.append("category", formData.category);
             data.append("frontend_demo", formData.frontend_demo);
             data.append("repository", formData.repository);
+            data.append("ai_technology", formData.ai_technology);
+            data.append("showcase_video", formData.showcase_video);
             data.append("batch", formData.batch);
             data.append("team_name", formData.team_name);
             data.append("is_published", String(formData.is_published));
             data.append("is_best_product", String(formData.is_best_product));
-            if (formData.best_product_rank) {
-                data.append("best_product_rank", formData.best_product_rank);
-            }
 
             // Add team members as JSON
             data.append("team_members", JSON.stringify(teamMembers));
@@ -243,8 +245,6 @@ export default function ProjectForm() {
             setIsSaving(false);
         }
     };
-
-    const roleOptions = allRoles;
 
     if (isLoading) {
         return (
@@ -439,58 +439,78 @@ export default function ProjectForm() {
                                     {teamMembers.map((member, index) => (
                                         <div
                                             key={index}
-                                            className="flex flex-wrap items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10"
+                                            className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3"
                                         >
-                                            <input
-                                                type="text"
-                                                value={member.name}
-                                                onChange={(e) =>
-                                                    updateTeamMember(index, "name", e.target.value)
-                                                }
-                                                placeholder="Member name"
-                                                className="flex-1 min-w-[150px] px-3 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-[#8A3DFF]/50"
-                                                required
-                                            />
-                                            <Select
-                                                value={member.role}
-                                                onValueChange={(value) =>
-                                                    updateTeamMember(index, "role", value)
-                                                }
-                                            >
-                                                <SelectTrigger className="w-[160px]">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {roleOptions.map((role) => (
-                                                        <SelectItem key={role.value} value={role.value}>
-                                                            {role.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <label className="flex items-center gap-2 cursor-pointer">
+                                            <div className="flex flex-wrap items-center gap-3">
                                                 <input
-                                                    type="checkbox"
-                                                    checked={member.is_scrum_master}
+                                                    type="text"
+                                                    value={member.name}
                                                     onChange={(e) =>
-                                                        updateTeamMember(
-                                                            index,
-                                                            "is_scrum_master",
-                                                            e.target.checked
-                                                        )
+                                                        updateTeamMember(index, "name", e.target.value)
                                                     }
-                                                    disabled={member.role === "hustler"}
-                                                    className="w-4 h-4 rounded accent-[#8A3DFF]"
+                                                    placeholder="Member name"
+                                                    className="flex-1 min-w-[150px] px-3 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-[#8A3DFF]/50"
+                                                    required
                                                 />
-                                                <Crown className="w-4 h-4 text-yellow-400" />
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => removeTeamMember(index)}
-                                                className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                                {/* Role Select */}
+                                                <Select
+                                                    value={member.role}
+                                                    onValueChange={(value) => updateTeamMember(index, "role", value)}
+                                                >
+                                                    <SelectTrigger className="w-[180px]">
+                                                        <SelectValue placeholder="Select Role" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {roleOptions.map((role) => (
+                                                            <SelectItem key={role.value} value={role.value}>
+                                                                {role.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {/* Program Select */}
+                                                <Select
+                                                    value={member.program}
+                                                    onValueChange={(value) =>
+                                                        updateTeamMember(index, "program", value)
+                                                    }
+                                                >
+                                                    <SelectTrigger className="w-[220px]">
+                                                        <SelectValue placeholder="Select Program" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {allPrograms.map((prog) => (
+                                                            <SelectItem key={prog} value={prog}>
+                                                                {programLabels[prog]}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {/* Crown for Hustler/PM */}
+                                                {member.role === "hustler" && (
+                                                    <Crown className="w-5 h-5 text-yellow-400" />
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeTeamMember(index)}
+                                                    className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            {/* LinkedIn URL input */}
+                                            <div className="flex items-center gap-2">
+                                                <Linkedin className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                                                <input
+                                                    type="url"
+                                                    value={member.linkedin_url || ""}
+                                                    onChange={(e) =>
+                                                        updateTeamMember(index, "linkedin_url", e.target.value)
+                                                    }
+                                                    placeholder="LinkedIn URL (optional)"
+                                                    className="flex-1 px-3 py-1.5 text-sm rounded-lg bg-white/5 border border-white/10 focus:outline-none focus:border-[#8A3DFF]/50"
+                                                />
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -533,6 +553,39 @@ export default function ProjectForm() {
                                     placeholder="https://github.com/user/repo"
                                     className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 focus:border-[#8A3DFF]/50 focus:outline-none"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Showcase Video URL
+                                </label>
+                                <input
+                                    type="url"
+                                    value={formData.showcase_video}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, showcase_video: e.target.value })
+                                    }
+                                    placeholder="https://youtube.com/watch?v=..."
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 focus:border-[#8A3DFF]/50 focus:outline-none"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium mb-2">
+                                    AI/Algorithm Technology Used
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.ai_technology}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, ai_technology: e.target.value })
+                                    }
+                                    placeholder="e.g., TensorFlow, PyTorch, YOLO, GPT-4, etc."
+                                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 focus:border-[#8A3DFF]/50 focus:outline-none"
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Describe the AI algorithms or technologies used in this project (optional)
+                                </p>
                             </div>
                         </div>
                     </CardContent>
@@ -615,22 +668,9 @@ export default function ProjectForm() {
                             </label>
 
                             {formData.is_best_product && (
-                                <div className="flex items-center gap-2">
-                                    <label className="text-sm">Rank:</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={formData.best_product_rank}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                best_product_rank: e.target.value,
-                                            })
-                                        }
-                                        placeholder="1"
-                                        className="w-20 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 focus:outline-none"
-                                    />
-                                </div>
+                                <span className="text-sm text-[#8A3DFF]">
+                                    ✓ This project will be featured as Best Product
+                                </span>
                             )}
                         </div>
                     </CardContent>

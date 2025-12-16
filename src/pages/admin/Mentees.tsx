@@ -5,6 +5,7 @@ import {
     updateMentee,
     deleteMentee,
     createMentee,
+    bulkDeleteMentees,
     roleLabels,
     programLabels,
     allRoles,
@@ -37,15 +38,21 @@ import {
     Crown,
     Edit2,
     Save,
+    Linkedin,
 } from "lucide-react";
 
 const roleColors: Record<string, string> = {
     hustler: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
     hacker: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    design_researcher: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    hipster: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    design_researcher: "bg-rose-500/20 text-rose-400 border-rose-500/30",
     data_engineer: "bg-green-500/20 text-green-400 border-green-500/30",
     ml_engineer: "bg-orange-500/20 text-orange-400 border-orange-500/30",
     ml_ops: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    game_designer: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    game_artist: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    game_programmer: "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    scrum_master: "bg-amber-500/20 text-amber-400 border-amber-500/30",
 };
 
 const programColors: Record<string, string> = {
@@ -62,6 +69,7 @@ interface EditingMentee {
     program: MenteeProgram;
     team_id: number | null;
     is_scrum_master: boolean;
+    linkedin_url: string;
 }
 
 export default function AdminMentees() {
@@ -82,8 +90,13 @@ export default function AdminMentees() {
         role: "hacker" as MenteeRole,
         program: "web_uiux" as MenteeProgram,
         is_scrum_master: false,
+        linkedin_url: "",
     });
     const [isSaving, setIsSaving] = useState(false);
+
+    // Bulk delete state
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -118,6 +131,7 @@ export default function AdminMentees() {
             program: mentee.program || "web_uiux",
             team_id: mentee.team_id,
             is_scrum_master: mentee.is_scrum_master,
+            linkedin_url: mentee.linkedin_url || "",
         });
     };
 
@@ -137,6 +151,7 @@ export default function AdminMentees() {
                 program: editData.program,
                 team_id: editData.team_id || undefined,
                 is_scrum_master: editData.is_scrum_master,
+                linkedin_url: editData.linkedin_url || undefined,
             });
             await fetchData();
             cancelEdit();
@@ -172,6 +187,7 @@ export default function AdminMentees() {
                 role: newMentee.role,
                 program: newMentee.program,
                 is_scrum_master: newMentee.is_scrum_master,
+                linkedin_url: newMentee.linkedin_url || undefined,
             });
             await fetchData();
             setShowAddForm(false);
@@ -182,12 +198,52 @@ export default function AdminMentees() {
                 role: "hacker",
                 program: "web_uiux",
                 is_scrum_master: false,
+                linkedin_url: "",
             });
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
             setError(error.response?.data?.message || "Failed to add mentee");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    // Bulk selection handlers
+    const toggleSelectAll = () => {
+        if (selectedIds.length === filteredMentees.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(filteredMentees.map(m => m.id));
+        }
+    };
+
+    const toggleSelect = (id: number) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(i => i !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.length === 0) return;
+
+        const message = selectedIds.length === filteredMentees.length
+            ? `Are you sure you want to delete ALL ${selectedIds.length} mentees?`
+            : `Are you sure you want to delete ${selectedIds.length} selected mentees?`;
+
+        if (!confirm(message)) return;
+
+        setIsDeleting(true);
+        try {
+            await bulkDeleteMentees(selectedIds);
+            setSelectedIds([]);
+            await fetchData();
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } };
+            setError(error.response?.data?.message || "Failed to delete mentees");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -339,7 +395,7 @@ export default function AdminMentees() {
                                                     setNewMentee({
                                                         ...newMentee,
                                                         role: value as MenteeRole,
-                                                        is_scrum_master: value === "hustler" ? false : newMentee.is_scrum_master,
+                                                        is_scrum_master: value === "scrum_master" ? true : newMentee.is_scrum_master,
                                                     })
                                                 }
                                             >
@@ -381,24 +437,23 @@ export default function AdminMentees() {
                                             </Select>
                                         </div>
 
-                                        {/* Scrum Master */}
-                                        <div className="flex items-end">
-                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={newMentee.is_scrum_master}
-                                                    onChange={(e) =>
-                                                        setNewMentee({
-                                                            ...newMentee,
-                                                            is_scrum_master: e.target.checked,
-                                                        })
-                                                    }
-                                                    disabled={newMentee.role === "hustler"}
-                                                    className="w-5 h-5 rounded border-white/20 bg-white/5 text-[#8A3DFF]"
-                                                />
-                                                <span className="text-sm">Scrum Master</span>
-                                                <Crown className="w-4 h-4 text-yellow-400" />
+                                        {/* LinkedIn URL */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">
+                                                LinkedIn URL (Optional)
                                             </label>
+                                            <div className="relative">
+                                                <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                                <input
+                                                    type="url"
+                                                    value={newMentee.linkedin_url}
+                                                    onChange={(e) =>
+                                                        setNewMentee({ ...newMentee, linkedin_url: e.target.value })
+                                                    }
+                                                    placeholder="https://linkedin.com/in/..."
+                                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 focus:border-[#8A3DFF]/50 focus:outline-none focus:ring-2 focus:ring-[#8A3DFF]/20"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -467,9 +522,31 @@ export default function AdminMentees() {
                 </div>
             </div>
 
-            {/* Stats */}
-            <div className="mb-6 flex items-center gap-4 text-sm text-muted-foreground">
-                <span>Total: {filteredMentees.length} mentees</span>
+            {/* Stats and Bulk Actions */}
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <span className="text-sm text-muted-foreground">Total: {filteredMentees.length} mentees</span>
+
+                {/* Bulk Delete Actions */}
+                <div className="flex items-center gap-3">
+                    {selectedIds.length > 0 && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleBulkDelete}
+                            disabled={isDeleting}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 rounded-xl font-medium hover:bg-red-500/30 disabled:opacity-50"
+                        >
+                            {isDeleting ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Trash2 className="w-4 h-4" />
+                            )}
+                            Delete Selected ({selectedIds.length})
+                        </motion.button>
+                    )}
+                </div>
             </div>
 
             {/* Mentees Table */}
@@ -478,6 +555,14 @@ export default function AdminMentees() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-white/10 bg-white/5">
+                                <th className="text-left px-4 py-4 font-medium text-muted-foreground">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.length === filteredMentees.length && filteredMentees.length > 0}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 rounded border-white/20 bg-white/5 accent-[#8A3DFF]"
+                                    />
+                                </th>
                                 <th className="text-left px-6 py-4 font-medium text-muted-foreground">
                                     Name
                                 </th>
@@ -501,7 +586,7 @@ export default function AdminMentees() {
                         <tbody>
                             {filteredMentees.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center">
+                                    <td colSpan={7} className="px-6 py-12 text-center">
                                         <GraduationCap className="w-12 h-12 mx-auto mb-4 text-[#8A3DFF]/30" />
                                         <p className="text-muted-foreground">No mentees found</p>
                                     </td>
@@ -510,28 +595,74 @@ export default function AdminMentees() {
                                 filteredMentees.map((mentee) => (
                                     <tr
                                         key={mentee.id}
-                                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                                        className={`border-b border-white/5 hover:bg-white/5 transition-colors ${selectedIds.includes(mentee.id) ? "bg-[#8A3DFF]/10" : ""
+                                            }`}
                                     >
+                                        {/* Checkbox */}
+                                        <td className="px-4 py-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.includes(mentee.id)}
+                                                onChange={() => toggleSelect(mentee.id)}
+                                                className="w-4 h-4 rounded border-white/20 bg-white/5 accent-[#8A3DFF]"
+                                            />
+                                        </td>
+
                                         {/* Name */}
                                         <td className="px-6 py-4">
                                             {editingId === mentee.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={editData?.name || ""}
-                                                    onChange={(e) =>
-                                                        setEditData({
-                                                            ...editData!,
-                                                            name: e.target.value,
-                                                        })
-                                                    }
-                                                    className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/20 focus:border-[#8A3DFF]/50 focus:outline-none"
-                                                />
+                                                <div className="space-y-2">
+                                                    <input
+                                                        type="text"
+                                                        value={editData?.name || ""}
+                                                        onChange={(e) =>
+                                                            setEditData({
+                                                                ...editData!,
+                                                                name: e.target.value,
+                                                            })
+                                                        }
+                                                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/20 focus:border-[#8A3DFF]/50 focus:outline-none"
+                                                    />
+                                                    <div className="relative">
+                                                        <Linkedin className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                                                        <input
+                                                            type="url"
+                                                            value={editData?.linkedin_url || ""}
+                                                            onChange={(e) =>
+                                                                setEditData({
+                                                                    ...editData!,
+                                                                    linkedin_url: e.target.value,
+                                                                })
+                                                            }
+                                                            placeholder="LinkedIn URL"
+                                                            className="w-full pl-7 pr-2 py-1 text-xs rounded-lg bg-white/5 border border-white/20 focus:border-[#8A3DFF]/50 focus:outline-none"
+                                                        />
+                                                    </div>
+                                                </div>
                                             ) : (
-                                                <div className="flex items-center gap-2" title={mentee.is_scrum_master ? "Scrum Master" : ""}>
-                                                    <span className="font-medium">{mentee.name}</span>
-                                                    {mentee.is_scrum_master && (
-                                                        <Crown className="w-4 h-4 text-yellow-400" />
-                                                    )}
+                                                <div className="flex items-center gap-2">
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-medium">{mentee.name}</span>
+                                                            {/* Crown for Hustler/PM */}
+                                                            {mentee.role === "hustler" && (
+                                                                <div title="Hustler/PM">
+                                                                    <Crown className="w-4 h-4 text-yellow-400" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {mentee.linkedin_url && (
+                                                            <a
+                                                                href={mentee.linkedin_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"
+                                                            >
+                                                                <Linkedin className="w-3 h-3" />
+                                                                LinkedIn
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
                                         </td>
@@ -580,7 +711,7 @@ export default function AdminMentees() {
                                                         setEditData({
                                                             ...editData!,
                                                             role: value as MenteeRole,
-                                                            is_scrum_master: value === "hustler" ? false : editData!.is_scrum_master,
+                                                            is_scrum_master: value === "scrum_master" ? true : editData!.is_scrum_master,
                                                         })
                                                     }
                                                 >
@@ -650,27 +781,6 @@ export default function AdminMentees() {
                                             <div className="flex items-center justify-end gap-2">
                                                 {editingId === mentee.id ? (
                                                     <>
-                                                        {/* Scrum Master Toggle */}
-                                                        <label
-                                                            className={`flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer ${editData?.is_scrum_master
-                                                                ? "bg-yellow-500/20 text-yellow-400"
-                                                                : "bg-white/5 text-muted-foreground"
-                                                                } ${editData?.role === "hustler" ? "opacity-50 cursor-not-allowed" : ""}`}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={editData?.is_scrum_master || false}
-                                                                onChange={(e) =>
-                                                                    setEditData({
-                                                                        ...editData!,
-                                                                        is_scrum_master: e.target.checked,
-                                                                    })
-                                                                }
-                                                                disabled={editData?.role === "hustler"}
-                                                                className="sr-only"
-                                                            />
-                                                            <Crown className="w-4 h-4" />
-                                                        </label>
                                                         <motion.button
                                                             whileHover={{ scale: 1.1 }}
                                                             whileTap={{ scale: 0.9 }}

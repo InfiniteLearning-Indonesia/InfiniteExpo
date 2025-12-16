@@ -6,6 +6,7 @@ export interface TeamMember {
     role: string;
     program?: string;
     is_scrum_master: boolean;
+    linkedin_url?: string;
     batch: number;
     created_at: string;
 }

@@ -1,29 +1,42 @@
 import api from "./axios";
 import type { TeamMember } from "./team.api";
 
-// Project Categories
+// Project Categories - Only new categories (no legacy)
 export type ProjectCategory =
-  | "merge" // Legacy
-  | "non-merge" // Legacy
+  | "ai_dev"
+  | "web_dev"
+  | "mobile_dev"
   | "merge_web_ai"
   | "merge_web_mobile"
-  | "merge_ai_mobile"
-  | "web_only"
-  | "mobile_only"
-  | "game_only"
-  | "ai_only";
+  | "merge_collab"
+  | "game_dev"
+  | "hcrh"
+  | "comp_net_sec";
 
 export const categoryLabels: Record<ProjectCategory, string> = {
-  merge: "Web + AI (Legacy)",
-  "non-merge": "Web Only (Legacy)",
-  merge_web_ai: "Merge: Web + AI",
-  merge_web_mobile: "Merge: Web + Mobile",
-  merge_ai_mobile: "Merge: AI + Mobile",
-  web_only: "Web Development",
-  mobile_only: "Mobile Development",
-  game_only: "Game Development",
-  ai_only: "AI Development",
+  ai_dev: "AI Dev",
+  web_dev: "Web Dev",
+  mobile_dev: "Mobile Dev",
+  merge_web_ai: "Merge (Web + AI)",
+  merge_web_mobile: "Merge (Web + Mobile)",
+  merge_collab: "Merge Collab (Web + Mobile + AI)",
+  game_dev: "Game Dev",
+  hcrh: "HCRH",
+  comp_net_sec: "Computer and Network Security",
 };
+
+// All categories for dropdown
+export const allCategories: ProjectCategory[] = [
+  "ai_dev",
+  "web_dev",
+  "mobile_dev",
+  "merge_web_ai",
+  "merge_web_mobile",
+  "merge_collab",
+  "game_dev",
+  "hcrh",
+  "comp_net_sec",
+];
 
 // Types
 export interface Project {
@@ -39,10 +52,12 @@ export interface Project {
   big_idea?: string;
   frontend_demo?: string;
   repository?: string;
+  ai_technology?: string; // Algorithm/AI technology used
+  showcase_video?: string; // Showcase video URL
   is_published: boolean;
   is_best_product?: boolean;
   best_product_rank?: number | null;
-  members?: TeamMember[]; // Frontend often expects this
+  members?: TeamMember[];
   created_at: string;
   updated_at: string;
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { getProjectById, type Project, categoryLabels, type ProjectCategory } from "../../api/project.api";
+import { programLabels, type MenteeProgram } from "../../api/mentee.api";
 import { Badge } from "../../components/ui/badge";
 import { Card, CardContent } from "../../components/ui/card";
 import { Separator } from "../../components/ui/separator";
@@ -22,6 +23,10 @@ import {
     Gamepad2,
     Crown,
     Edit,
+    Linkedin,
+    Video,
+    Cpu,
+    Shield,
 } from "lucide-react";
 
 // Animation Variants
@@ -90,24 +95,38 @@ export default function AdminProjectDetails() {
             description: "No description available.",
         };
 
-        if (cat === "web_only") {
-            return { ...base, icon: <Code2 className="w-5 h-5" />, gradient: "from-blue-500 to-cyan-500" };
-        }
-        if (cat === "mobile_only") {
-            return { ...base, icon: <Smartphone className="w-5 h-5" />, gradient: "from-green-500 to-emerald-500" };
-        }
-        if (cat === "ai_only") {
+        // New categories only
+        if (cat === "ai_dev") {
             return { ...base, icon: <Brain className="w-5 h-5" />, gradient: "from-purple-500 to-violet-500" };
         }
-        if (cat === "game_only") {
-            return { ...base, icon: <Gamepad2 className="w-5 h-5" />, gradient: "from-red-500 to-orange-500" };
+        if (cat === "web_dev") {
+            return { ...base, icon: <Code2 className="w-5 h-5" />, gradient: "from-blue-500 to-cyan-500" };
         }
-        if (cat?.includes("merge")) {
+        if (cat === "mobile_dev") {
+            return { ...base, icon: <Smartphone className="w-5 h-5" />, gradient: "from-green-500 to-emerald-500" };
+        }
+        if (cat === "merge_web_ai") {
+            return { ...base, icon: <Layers className="w-5 h-5" />, gradient: "from-indigo-500 to-purple-500" };
+        }
+        if (cat === "merge_web_mobile") {
+            return { ...base, icon: <Layers className="w-5 h-5" />, gradient: "from-teal-500 to-blue-500" };
+        }
+        if (cat === "merge_collab") {
             return { ...base, icon: <Layers className="w-5 h-5" />, gradient: "from-pink-500 to-rose-500" };
         }
+        if (cat === "game_dev") {
+            return { ...base, icon: <Gamepad2 className="w-5 h-5" />, gradient: "from-red-500 to-orange-500" };
+        }
+        if (cat === "hcrh") {
+            return { ...base, icon: <Monitor className="w-5 h-5" />, gradient: "from-amber-500 to-yellow-500" };
+        }
+        if (cat === "comp_net_sec") {
+            return { ...base, icon: <Shield className="w-5 h-5" />, gradient: "from-slate-500 to-zinc-500" };
+        }
 
+        // Fallback
         return {
-            label: categoryLabels[cat] || "Web Development",
+            label: categoryLabels[cat] || "Project",
             icon: <Code2 className="w-5 h-5" />,
             gradient: "from-blue-500 to-cyan-500"
         };
@@ -192,7 +211,7 @@ export default function AdminProjectDetails() {
                                 {project.is_best_product && (
                                     <Badge className="bg-yellow-500/90 text-black border-0 gap-1">
                                         <Crown className="w-3 h-3" />
-                                        Rank #{project.best_product_rank}
+                                        Best Product
                                     </Badge>
                                 )}
                             </div>
@@ -225,20 +244,82 @@ export default function AdminProjectDetails() {
                         </Card>
                     )}
 
-                    {/* Demo Link */}
+                    {/* AI Technology */}
+                    {project.ai_technology && (
+                        <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/20">
+                            <CardContent className="p-6">
+                                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                                    <Cpu className="w-5 h-5 text-purple-400" />
+                                    AI/Algorithm Technology
+                                </h3>
+                                <p className="text-lg leading-relaxed">{project.ai_technology}</p>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Demo Link - Embedded */}
                     {project.frontend_demo && (
-                        <Card className="bg-card border-white/10">
-                            <CardContent className="p-6 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <Monitor className="w-5 h-5 text-[#8A3DFF]" />
-                                    <div>
-                                        <h3 className="font-semibold">Live Demo</h3>
-                                        <p className="text-sm text-muted-foreground">{project.frontend_demo}</p>
+                        <Card className="bg-card border-white/10 overflow-hidden">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <Monitor className="w-5 h-5 text-[#8A3DFF]" />
+                                        <div>
+                                            <h3 className="font-semibold">Live Demo</h3>
+                                            <p className="text-sm text-muted-foreground truncate max-w-xs">{project.frontend_demo}</p>
+                                        </div>
                                     </div>
+                                    <a href={project.frontend_demo} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-[#8A3DFF] hover:bg-[#7a36e0] rounded-lg transition-colors flex items-center gap-2 text-sm font-medium text-white">
+                                        <ExternalLink className="w-4 h-4" /> Open
+                                    </a>
                                 </div>
-                                <a href={project.frontend_demo} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
-                                    <ExternalLink className="w-4 h-4" /> Open
-                                </a>
+                                <div className="rounded-xl overflow-hidden border border-white/10 bg-black">
+                                    <div className="bg-[#1a1a1a] px-4 py-2 flex items-center gap-2">
+                                        <div className="flex gap-1.5">
+                                            <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                                            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                                            <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                                        </div>
+                                        <div className="flex-1 mx-4">
+                                            <div className="bg-black/50 rounded-md px-3 py-1 text-xs text-muted-foreground truncate">{project.frontend_demo}</div>
+                                        </div>
+                                    </div>
+                                    <iframe
+                                        src={project.frontend_demo}
+                                        title={`${project.title} Demo`}
+                                        className="w-full h-[300px] bg-white"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Showcase Video - Embedded */}
+                    {project.showcase_video && (
+                        <Card className="bg-card border-white/10 overflow-hidden">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <Video className="w-5 h-5 text-red-400" />
+                                        <div>
+                                            <h3 className="font-semibold">Showcase Video</h3>
+                                            <p className="text-sm text-muted-foreground truncate max-w-xs">{project.showcase_video}</p>
+                                        </div>
+                                    </div>
+                                    <a href={project.showcase_video} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
+                                        <ExternalLink className="w-4 h-4" /> Open
+                                    </a>
+                                </div>
+                                <div className="rounded-xl overflow-hidden border border-white/10 bg-black">
+                                    <iframe
+                                        src={project.showcase_video}
+                                        title={`${project.title} Showcase Video`}
+                                        className="w-full h-[300px]"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                        allowFullScreen
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
                     )}
@@ -267,19 +348,36 @@ export default function AdminProjectDetails() {
                                                 {member.name.charAt(0)}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-sm truncate">{member.name}</p>
                                                 <div className="flex items-center gap-2">
-                                                    <p className="text-xs text-muted-foreground truncate capitalize">{member.role?.replace(/_/g, ' ') || 'Member'}</p>
-                                                    {member.program && (
-                                                        <Badge variant="outline" className="text-[10px] h-4 px-1 py-0 border-white/20 text-white/50">{member.program}</Badge>
+                                                    <p className="font-medium text-sm truncate">{member.name}</p>
+                                                    {/* Crown for Hustler/PM */}
+                                                    {member.role === "hustler" && (
+                                                        <div title="Hustler/PM">
+                                                            <Crown className="w-4 h-4 text-yellow-400" />
+                                                        </div>
                                                     )}
                                                 </div>
-                                            </div>
-                                            {member.is_scrum_master && (
-                                                <div title="Scrum Master">
-                                                    <Crown className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <p className="text-xs text-muted-foreground truncate capitalize">{member.role?.replace(/_/g, ' ') || 'Member'}</p>
+                                                    {member.program && (
+                                                        <Badge variant="outline" className="text-[10px] h-4 px-1 py-0 border-white/20 text-white/50">
+                                                            {programLabels[member.program as MenteeProgram] || member.program}
+                                                        </Badge>
+                                                    )}
                                                 </div>
-                                            )}
+                                                {/* LinkedIn */}
+                                                {member.linkedin_url && (
+                                                    <a
+                                                        href={member.linkedin_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1"
+                                                    >
+                                                        <Linkedin className="w-3 h-3" />
+                                                        LinkedIn
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
