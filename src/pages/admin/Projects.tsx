@@ -285,7 +285,7 @@ export default function AdminProjects() {
                                             src={
                                                 project.thumbnail.startsWith("http")
                                                     ? project.thumbnail
-                                                    : `http://localhost:3000${project.thumbnail}`
+                                                    : `https://api-exhibition.infinitelearningstudent.id${project.thumbnail}`
                                             }
                                             alt={project.title}
                                             className="w-full h-full object-cover"

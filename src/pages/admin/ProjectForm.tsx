@@ -124,7 +124,7 @@ export default function ProjectForm() {
                     setThumbnailPreview(
                         project.thumbnail.startsWith("http")
                             ? project.thumbnail
-                            : `http://localhost:3000${project.thumbnail}`
+                            : `https://api-exhibition.infinitelearningstudent.id${project.thumbnail}`
                     );
                 }
 
