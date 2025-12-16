@@ -85,7 +85,7 @@ export default function ProjectDetails() {
     const getImageUrl = (path?: string) => {
         if (!path) return null;
         if (path.startsWith("http")) return path;
-        return `http://localhost:3000${path}`;
+        return `https://api-exhibition.infinitelearningstudent.id${path}`;
     };
 
     const getCategoryInfo = (category?: string) => {

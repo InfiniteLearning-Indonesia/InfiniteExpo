@@ -257,7 +257,7 @@ export default function Projects() {
                                                         src={
                                                             project.thumbnail.startsWith("http")
                                                                 ? project.thumbnail
-                                                                : `http://localhost:3000${project.thumbnail}`
+                                                                : `https://api-exhibition.infinitelearningstudent.id${project.thumbnail}`
                                                         }
                                                         alt={project.title}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -272,8 +272,8 @@ export default function Projects() {
                                                 {/* Category Badge */}
                                                 <Badge
                                                     className={`absolute top-4 left-4 ${(project.category as string)?.includes("merge")
-                                                            ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                                                            : "bg-gradient-to-r from-blue-500 to-cyan-500"
+                                                        ? "bg-gradient-to-r from-purple-500 to-pink-500"
+                                                        : "bg-gradient-to-r from-blue-500 to-cyan-500"
                                                         } text-white border-0 flex items-center gap-1`}
                                                 >
                                                     {getCategoryIcon(project.category as string)}
