@@ -5,7 +5,6 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginUser, clearError } from "../../store/slices/authSlice";
 import { Card, CardContent } from "../../components/ui/card";
 import {
-  Sparkles,
   Mail,
   Lock,
   ArrowRight,
@@ -15,6 +14,9 @@ import {
   EyeOff,
   ShieldCheck,
 } from "lucide-react";
+
+// Logo
+const logoSrc = "/logo-nobg.png";
 
 // Animation Variants
 const fadeInUp = {
@@ -134,8 +136,8 @@ export default function Login() {
               className="flex items-center justify-center gap-3 mb-4"
               whileHover={{ scale: 1.02 }}
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-accent flex items-center justify-center glow-accent">
-                <Sparkles className="w-7 h-7 text-white" />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden border border-[#8A3DFF]/50 p-px">
+                <img src={logoSrc} alt="InfiniteExpo Logo" className="w-full h-full object-contain" />
               </div>
             </motion.div>
             <h1 className="text-2xl font-bold">
@@ -191,8 +193,8 @@ export default function Login() {
                       }}
                       placeholder="admin@infinitelearning.id"
                       className={`w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border ${formErrors.email
-                          ? "border-red-500/50 focus:border-red-500"
-                          : "border-white/10 focus:border-[#8A3DFF]/50"
+                        ? "border-red-500/50 focus:border-red-500"
+                        : "border-white/10 focus:border-[#8A3DFF]/50"
                         } text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#8A3DFF]/20 transition-all`}
                     />
                   </div>
@@ -221,8 +223,8 @@ export default function Login() {
                       }}
                       placeholder="Enter your password"
                       className={`w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/5 border ${formErrors.password
-                          ? "border-red-500/50 focus:border-red-500"
-                          : "border-white/10 focus:border-[#8A3DFF]/50"
+                        ? "border-red-500/50 focus:border-red-500"
+                        : "border-white/10 focus:border-[#8A3DFF]/50"
                         } text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#8A3DFF]/20 transition-all`}
                     />
                     <button

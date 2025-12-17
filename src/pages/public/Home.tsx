@@ -6,7 +6,6 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 import {
-  Sparkles,
   Rocket,
   Users,
   Trophy,
@@ -20,7 +19,11 @@ import {
   Smartphone,
   Brain,
   Gamepad2,
+  Sparkles,
 } from "lucide-react";
+
+// Logo
+const logoSrc = "/logo-nobg.png";
 
 // Animation Variants
 const fadeInUp = {
@@ -148,8 +151,8 @@ export default function Home() {
               className="flex items-center gap-3"
               whileHover={{ scale: 1.02 }}
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-accent flex items-center justify-center glow-accent">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border border-[#8A3DFF]/50 p-px">
+                <img src={logoSrc} alt="InfiniteExpo Logo" className="w-full h-full object-contain" />
               </div>
               <span className="text-xl font-bold tracking-tight">
                 Infinite<span className="text-gradient">Expo</span>
@@ -560,7 +563,7 @@ export default function Home() {
                 transition={{ duration: 5, repeat: Infinity }}
                 className="inline-block mb-6"
               >
-                <Sparkles className="w-12 h-12 text-[#8A3DFF]" />
+                <img src={logoSrc} alt="InfiniteExpo Logo" className="w-20 h-16 object-contain" />
               </motion.div>
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
                 Ready to <span className="text-gradient">Explore?</span>
@@ -594,8 +597,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-accent flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border border-[#8A3DFF]/50 p-px">
+                <img src={logoSrc} alt="InfiniteExpo Logo" className="w-full h-full object-contain" />
               </div>
               <span className="text-xl font-bold">
                 Infinite<span className="text-gradient">Expo</span>
@@ -620,23 +623,29 @@ export default function Home() {
               >
                 Projects
               </a>
-              <Link
-                to="/admin"
-                className="hover:text-white transition-colors"
-              >
-                Admin Panel
-              </Link>
             </div>
           </div>
 
           <Separator className="my-8 bg-white/5" />
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground">
             <p>
               © {new Date().getFullYear()} InfiniteExpo. Built with 💜 by
-              Infinite Learning.
+              Infinite Learning Indonesia.
             </p>
             <p>Showcasing the future of technology.</p>
+            <Link
+              to="/admin"
+              className="hover:text-white transition-colors"
+            >
+              Admin Panel
+            </Link>
+            <Link
+              to="/admin/login"
+              className="hover:text-white transition-colors"
+            >
+              Login Admin
+            </Link>
           </div>
         </div>
       </footer>

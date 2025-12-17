@@ -5,7 +5,6 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { logoutUser } from "../../store/slices/authSlice";
 import { Separator } from "../../components/ui/separator";
 import {
-    Sparkles,
     LayoutDashboard,
     FolderKanban,
     Users,
@@ -16,6 +15,9 @@ import {
     Menu,
     X,
 } from "lucide-react";
+
+// Logo
+const logoSrc = "/logo-nobg.png";
 
 // Navigation items
 const navItems = [
@@ -82,8 +84,8 @@ export default function AdminLayout() {
                 {/* Logo */}
                 <div className="p-6">
                     <Link to="/" className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-accent flex items-center justify-center glow-accent">
-                            <Sparkles className="w-5 h-5 text-white" />
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border border-[#8A3DFF]/50 p-px">
+                            <img src={logoSrc} alt="InfiniteExpo Logo" className="w-full h-full object-contain" />
                         </div>
                         <span className="text-xl font-bold">
                             Infinite<span className="text-gradient">Expo</span>

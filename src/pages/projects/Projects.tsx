@@ -18,7 +18,6 @@ import {
     SelectValue,
 } from "../../components/ui/select";
 import {
-    Sparkles,
     Search,
     Rocket,
     ArrowLeft,
@@ -29,6 +28,9 @@ import {
     Smartphone,
     Gamepad2,
 } from "lucide-react";
+
+// Logo
+const logoSrc = "/logo-nobg.png";
 
 // Animation Variants
 const fadeInUp = {
@@ -104,8 +106,8 @@ export default function Projects() {
                             className="flex items-center gap-3"
                             whileHover={{ scale: 1.02 }}
                         >
-                            <div className="w-10 h-10 rounded-xl bg-gradient-accent flex items-center justify-center glow-accent">
-                                <Sparkles className="w-5 h-5 text-white" />
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border border-[#8A3DFF]/50 p-px">
+                                <img src={logoSrc} alt="InfiniteExpo Logo" className="w-full h-full object-contain" />
                             </div>
                             <span className="text-xl font-bold tracking-tight">
                                 Infinite<span className="text-gradient">Expo</span>
@@ -375,6 +377,22 @@ export default function Projects() {
                         © {new Date().getFullYear()} InfiniteExpo. Built with 💜 by Infinite
                         Learning.
                     </p>
+                    <p className="text-muted-foreground text-sm">
+                        <Link
+                            to="/admin"
+                            className="hover:text-white transition-colors"
+                        >
+                            Admin Panel
+                        </Link>
+                        <br />
+                        <Link
+                            to="/admin/login"
+                            className="hover:text-white transition-colors"
+                        >
+                            Login Admin
+                        </Link>
+                    </p>
+
                 </div>
             </footer>
         </div>
