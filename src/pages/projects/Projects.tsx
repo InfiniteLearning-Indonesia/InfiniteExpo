@@ -27,6 +27,7 @@ import {
     Brain,
     Smartphone,
     Gamepad2,
+    Trophy,
 } from "lucide-react";
 
 // Logo
@@ -271,16 +272,9 @@ export default function Projects() {
                                                 )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                                                {/* Category Badge */}
-                                                <Badge
-                                                    className={`absolute top-4 left-4 ${(project.category as string)?.includes("merge")
-                                                        ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                                                        : "bg-gradient-to-r from-blue-500 to-cyan-500"
-                                                        } text-white border-0 flex items-center gap-1`}
-                                                >
-                                                    {getCategoryIcon(project.category as string)}
-                                                    {categoryLabels[project.category as ProjectCategory] || "Web Development"}
-                                                </Badge>
+
+
+
 
                                                 {/* View Icon */}
                                                 <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -290,7 +284,26 @@ export default function Projects() {
 
                                             <CardContent className="p-6 flex flex-col flex-grow">
                                                 <div className="mb-auto">
-                                                    <h3 className="text-xl font-semibold mb-2 group-hover:text-[#8A3DFF] transition-colors line-clamp-1">
+                                                    {/* Category Badge */}
+                                                    <Badge
+                                                        className={`w-40 ${(project.category as string)?.includes("merge")
+                                                            ? "bg-gradient-to-r from-purple-500 to-pink-500"
+                                                            : "bg-gradient-to-r from-blue-500 to-cyan-500"
+                                                            } text-white border-0 flex items-center gap-1`}
+                                                    >
+                                                        {getCategoryIcon(project.category as string)}
+                                                        {categoryLabels[project.category as ProjectCategory] || "Web Development"}
+                                                    </Badge>
+                                                    {/* Best Project Badge */}
+                                                    {Boolean(project.is_best_product) && (
+                                                        <Badge
+                                                            className="my-3 w-40 bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 flex items-center gap-1 shadow-lg"
+                                                        >
+                                                            <Trophy className="w-3 h-3" />
+                                                            Best Product
+                                                        </Badge>
+                                                    )}
+                                                    <h3 className="text-xl font-semibold my-2 group-hover:text-[#8A3DFF] transition-colors line-clamp-1">
                                                         {project.title}
                                                     </h3>
 
