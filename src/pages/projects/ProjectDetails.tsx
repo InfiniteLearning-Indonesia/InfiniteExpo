@@ -201,7 +201,7 @@ export default function ProjectDetails() {
                                         {categoryInfo.icon}
                                         <span className="ml-1">{categoryInfo.label}</span>
                                     </Badge>
-                                    {project.is_best_product && (
+                                    {Boolean(project.is_best_product) && (
                                         <Badge className="bg-yellow-500/90 text-black border-0 gap-1">
                                             <Crown className="w-3 h-3" />
                                             Best Product

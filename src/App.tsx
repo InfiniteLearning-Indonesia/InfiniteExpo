@@ -18,6 +18,7 @@ import AdminMentees from "./pages/admin/Mentees";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
+import { NotFound } from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
+        <Route path="*" element={<NotFound />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:id" element={<ProjectDetails />} />
 
