@@ -1,26 +1,248 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* InfiniteExpo Light Theme (Tema Putih) based on Apple HIG */
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  
+  --card: rgba(255, 255, 255, 0.7);
+  --card-foreground: #1d1d1f;
+  
+  --popover: #ffffff;
+  --popover-foreground: #1d1d1f;
+  
+  --primary: #1d1d1f;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #e8e8ed;
+  --secondary-foreground: #1d1d1f;
+  
+  --muted: #e8e8ed;
+  --muted-foreground: #86868b;
+  
+  --accent: #8A3DFF;
+  --accent-foreground: #ffffff;
+  --accent-light: #A366FF;
+  --accent-dark: #6B2ACC;
+  --accent-glow: rgba(138, 61, 255, 0.2);
+  
+  --destructive: #ff453a;
+  
+  --border: #d2d2d7;
+  --input: rgba(0, 0, 0, 0.05);
+  --ring: #8A3DFF;
+  
+  --radius: 1rem;
+  
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1d1d1f;
+  --sidebar-primary: #8A3DFF;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f7;
+  --sidebar-accent-foreground: #1d1d1f;
+  --sidebar-border: #d2d2d7;
+  --sidebar-ring: #8A3DFF;
+}
+
+.dark {
+  /* InfiniteExpo Dark Theme (Default) based on Apple HIG & V1 colors */
+  --background: #000000;
+  --foreground: #ffffff;
+  
+  --card: rgba(28, 28, 30, 0.6);
+  --card-foreground: #ffffff;
+  
+  --popover: #1c1c1e;
+  --popover-foreground: #ffffff;
+  
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  
+  --secondary: #2c2c2e;
+  --secondary-foreground: #ffffff;
+  
+  --muted: #1c1c1e;
+  --muted-foreground: #86868b;
+  
+  --accent: #8A3DFF;
+  --accent-foreground: #ffffff;
+  --accent-light: #A366FF;
+  --accent-dark: #6B2ACC;
+  --accent-glow: rgba(138, 61, 255, 0.4);
+  
+  --destructive: #ff453a;
+  
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #8A3DFF;
+  
+  --sidebar: #1c1c1e;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #8A3DFF;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2c2c2e;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #8A3DFF;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-background text-foreground antialiased transition-colors duration-300;
   }
 }
 
-body {
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #8A3DFF 0%, #A366FF 50%, #C99FFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-accent {
+    background: linear-gradient(135deg, #8A3DFF 0%, #6B2ACC 100%);
+  }
+
+  .bg-gradient-hero {
+    background: radial-gradient(ellipse at top, rgba(138, 61, 255, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(138, 61, 255, 0.05) 0%, transparent 50%),
+      var(--background);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 40px rgba(138, 61, 255, 0.2),
+      0 0 80px rgba(138, 61, 255, 0.1);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 40px rgba(138, 61, 255, 0.3);
+  }
+
+  .glass {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+  }
+
+  .glass-hover:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(138, 61, 255, 0.3);
+  }
+
+  .dark .glass-hover:hover {
+    background: rgba(44, 44, 46, 0.8);
+    border-color: rgba(138, 61, 255, 0.3);
+  }
+
+  .card-gradient {
+    background: linear-gradient(180deg, rgba(138, 61, 255, 0.03) 0%, transparent 100%);
+  }
+
+  .border-gradient {
+    border: 1px solid transparent;
+    background: linear-gradient(var(--card), var(--card)) padding-box,
+      linear-gradient(135deg, rgba(138, 61, 255, 0.4), transparent 60%) border-box;
+  }
+  
+  .apple-press {
+    transition: transform 0.1s ease-in-out;
+  }
+  
+  .apple-press:active {
+    transform: scale(0.97);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
   background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8A3DFF;
+}
+
+/* Selection */
+::selection {
+  background: rgba(138, 61, 255, 0.2);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
