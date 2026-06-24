@@ -155,7 +155,7 @@ export default function ProjectDetailsClient({ initialProject }: ProjectDetailsC
               src={
                 project.thumbnail.startsWith("http")
                   ? project.thumbnail
-                  : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000"}${project.thumbnail}`
+                  : `${process.env.NEXT_PUBLIC_API_URL || "https://api-exhibition.infinitelearningstudent.id"}${project.thumbnail}`
               }
               alt={project.title}
               fill
@@ -356,7 +356,7 @@ export default function ProjectDetailsClient({ initialProject }: ProjectDetailsC
                     className="flex-shrink-0 w-72 sm:w-96 aspect-video rounded-2xl overflow-hidden border border-border/50 bg-secondary hover:border-[#8A3DFF]/50 transition-all duration-300 cursor-pointer snap-start hover:scale-[1.02] active:scale-[0.98] relative group"
                   >
                     <Image
-                      src={url.startsWith("http") ? url : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000"}${url}`}
+                      src={url.startsWith("http") ? url : `${process.env.NEXT_PUBLIC_API_URL || "https://api-exhibition.infinitelearningstudent.id"}${url}`}
                       alt={`${project.title} Screenshot ${idx + 1}`}
                       fill
                       sizes="(max-width: 640px) 288px, 384px"
@@ -494,7 +494,7 @@ export default function ProjectDetailsClient({ initialProject }: ProjectDetailsC
               src={
                 screenshots[lightboxIndex].startsWith("http")
                   ? screenshots[lightboxIndex]
-                  : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000"}${screenshots[lightboxIndex]}`
+                  : `${process.env.NEXT_PUBLIC_API_URL || "https://api-exhibition.infinitelearningstudent.id"}${screenshots[lightboxIndex]}`
               }
               alt="Gameplay Screenshot Fullscreen"
               className="max-w-full max-h-[80vh] object-contain rounded-2xl border border-white/10 shadow-2xl select-none"

@@ -10,7 +10,7 @@ export const revalidate = 600; // Enable Next.js ISR (10 minutes revalidation)
 
 async function getProject(id: string): Promise<Project | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api-exhibition.infinitelearningstudent.id";
     const res = await fetch(`${apiUrl}/api/projects/${id}`, {
       next: { revalidate: 600 },
     });

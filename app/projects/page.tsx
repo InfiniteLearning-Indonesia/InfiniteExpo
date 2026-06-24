@@ -263,7 +263,7 @@ export default function ProjectsGallery() {
                           src={
                             project.thumbnail.startsWith("http")
                               ? project.thumbnail
-                              : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000"}${project.thumbnail}`
+                              : `${process.env.NEXT_PUBLIC_API_URL || "https://api-exhibition.infinitelearningstudent.id"}${project.thumbnail}`
                           }
                           alt={project.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
