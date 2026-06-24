@@ -15,7 +15,8 @@ import {
   Code2,
   Trophy,
   AlertCircle,
-  Filter
+  Filter,
+  User
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -329,10 +330,10 @@ export default function ProjectsGallery() {
                             {project.members.slice(0, 4).map((member) => (
                               <div
                                 key={member.id}
-                                className="h-6 w-6 rounded-full border border-background bg-secondary text-[10px] font-bold flex items-center justify-center text-foreground cursor-help"
+                                className="h-6 w-6 rounded-full border border-background bg-secondary flex items-center justify-center text-muted-foreground cursor-help"
                                 title={`${member.name} - ${member.role}`}
                               >
-                                {member.name.charAt(0).toUpperCase()}
+                                <User className="w-3.5 h-3.5" />
                               </div>
                             ))}
                             {project.members.length > 4 && (

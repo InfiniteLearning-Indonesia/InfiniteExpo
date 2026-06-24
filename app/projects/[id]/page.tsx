@@ -14,7 +14,12 @@ import {
   Monitor,
   CheckCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  User
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -28,6 +33,9 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [screenshots, setScreenshots] = useState<string[]>([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const fetchProjectData = async () => {
     if (!id) return;
@@ -51,6 +59,36 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
   useEffect(() => {
     fetchProjectData();
   }, [id]);
+ 
+  useEffect(() => {
+    if (project && project.screenshots) {
+      try {
+        const parsed = JSON.parse(project.screenshots);
+        if (Array.isArray(parsed)) {
+          setScreenshots(parsed);
+        }
+      } catch (e) {
+        console.error("Failed to parse project screenshots:", e);
+      }
+    } else {
+      setScreenshots([]);
+    }
+  }, [project]);
+ 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!lightboxOpen) return;
+      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "ArrowLeft") {
+        setLightboxIndex((prev) => (prev === 0 ? screenshots.length - 1 : prev - 1));
+      }
+      if (e.key === "ArrowRight") {
+        setLightboxIndex((prev) => (prev === screenshots.length - 1 ? 0 : prev + 1));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxOpen, screenshots.length]);
 
   // Video embed url generator
   const getEmbedUrl = (url?: string) => {
@@ -156,6 +194,11 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary/80 text-foreground border border-border/50">
                 {categoryLabels[project.category as ProjectCategory] || "Web Development"}
               </span>
+              {project.category === "game_dev" && project.genre && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#8A3DFF]/15 text-[#8A3DFF] border border-[#8A3DFF]/30">
+                  {project.genre}
+                </span>
+              )}
               {project.is_best_product && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-yellow-500 text-black shadow-sm border-0">
                   <Trophy className="w-3 h-3" />
@@ -168,7 +211,7 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
             </h1>
             {project.team_name && (
               <p className="text-sm font-semibold text-[#8A3DFF] mt-2">
-                Developed by: {project.team_name}
+                {project.category === "game_dev" ? `Studio: ${project.team_name}` : `Developed by: ${project.team_name}`}
                 {project.batch && <span className="text-muted-foreground font-normal"> • Batch {project.batch}</span>}
               </p>
             )}
@@ -293,6 +336,40 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
               );
             })()}
 
+            {/* Game Dev Metadata (Platforms & Genre) under resources card */}
+            {project.category === "game_dev" && (
+              <div className="glass rounded-3xl p-6 border border-border/50 flex flex-col gap-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Game Specifications</h3>
+                
+                <div className="flex flex-col gap-4">
+                  {project.genre && (
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">Genre</span>
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#8A3DFF]/10 text-[#8A3DFF] border border-[#8A3DFF]/25">
+                        {project.genre}
+                      </span>
+                    </div>
+                  )}
+                  {project.platforms && (
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">Platforms</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.platforms.split(",").map((plat) => {
+                          const trimmed = plat.trim();
+                          if (!trimmed) return null;
+                          return (
+                            <span key={trimmed} className="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold bg-secondary/60 text-foreground border border-border/50">
+                              {trimmed}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* AI Tech Card */}
             {project.ai_technology && (
               <div className="glass rounded-3xl p-6 border border-border/50">
@@ -322,6 +399,45 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
             )}
           </div>
         </div>
+
+        {/* Gameplay Screenshots Section for Game Dev */}
+        {project.category === "game_dev" && screenshots.length > 0 && (
+          <div className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 rounded-full bg-[#8A3DFF]/10 flex items-center justify-center">
+                <ImageIcon className="w-4 h-4 text-[#8A3DFF]" />
+              </div>
+              <h2 className="text-xl font-bold tracking-tight">Gameplay Screenshots</h2>
+            </div>
+            
+            {/* Scrollable Gallery */}
+            <div className="relative">
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-border scroll-smooth snap-x">
+                {screenshots.map((url, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      setLightboxIndex(idx);
+                      setLightboxOpen(true);
+                    }}
+                    className="flex-shrink-0 w-72 sm:w-96 aspect-video rounded-2xl overflow-hidden border border-border/50 bg-secondary hover:border-[#8A3DFF]/50 transition-all duration-300 cursor-pointer snap-start hover:scale-[1.02] active:scale-[0.98] relative group"
+                  >
+                    <img
+                      src={url.startsWith("http") ? url : `http://localhost:7000${url}`}
+                      alt={`${project.title} Screenshot ${idx + 1}`}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-black/60 px-3 py-1.5 rounded-full border border-white/20">
+                        View Image
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Video Embed Section (Moved below description) */}
         {project.showcase_video && (
@@ -366,8 +482,8 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
                 >
                   <div className="flex items-center gap-4">
                     {/* Avatar Icon */}
-                    <div className="w-12 h-12 rounded-2xl bg-[#8A3DFF]/10 text-[#8A3DFF] flex items-center justify-center text-base font-bold uppercase">
-                      {member.name.charAt(0)}
+                    <div className="w-12 h-12 rounded-full bg-[#8A3DFF]/10 text-[#8A3DFF] flex items-center justify-center">
+                      <User className="w-5 h-5" />
                     </div>
                     <div>
                       <h3 className="text-sm font-bold text-foreground group-hover:text-[#8A3DFF] transition-colors">
@@ -401,7 +517,61 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
           </div>
         )}
       </div>
-
+ 
+      {/* Lightbox Modal */}
+      {lightboxOpen && screenshots.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 transition-opacity duration-300 animate-fade-in animate-duration-200">
+          {/* Close Button */}
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-colors apple-press"
+          >
+            <X className="w-6 h-6" />
+          </button>
+ 
+          {/* Navigation Controls */}
+          {screenshots.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex((prev) => (prev === 0 ? screenshots.length - 1 : prev - 1));
+                }}
+                className="absolute left-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-colors apple-press"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex((prev) => (prev === screenshots.length - 1 ? 0 : prev + 1));
+                }}
+                className="absolute right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-colors apple-press"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+ 
+          {/* Large Image Container */}
+          <div className="max-w-[90vw] max-h-[85vh] flex flex-col items-center justify-center relative select-none">
+            <img
+              src={
+                screenshots[lightboxIndex].startsWith("http")
+                  ? screenshots[lightboxIndex]
+                  : `http://localhost:7000${screenshots[lightboxIndex]}`
+              }
+              alt="Gameplay Screenshot Fullscreen"
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl border border-white/10 shadow-2xl select-none"
+            />
+            {/* Caption */}
+            <p className="text-white/60 text-xs font-semibold tracking-wider mt-4 uppercase">
+              Screenshot {lightboxIndex + 1} of {screenshots.length}
+            </p>
+          </div>
+        </div>
+      )}
+ 
       <Footer />
     </div>
   );

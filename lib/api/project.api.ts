@@ -7,6 +7,7 @@ export type ProjectCategory =
   | "mobile_dev"
   | "merge_web_ai"
   | "merge_web_mobile"
+  | "merge_mobile_ai"
   | "merge_collab"
   | "game_dev"
   | "hcrh"
@@ -19,6 +20,7 @@ export const categoryLabels: Record<ProjectCategory, string> = {
   mobile_dev: "Mobile Dev",
   merge_web_ai: "Merge (Web + AI)",
   merge_web_mobile: "Merge (Web + Mobile)",
+  merge_mobile_ai: "Merge (Mobile + AI)",
   merge_collab: "Merge Collab (Web + Mobile + AI)",
   game_dev: "Game Dev",
   hcrh: "HCRH",
@@ -32,6 +34,7 @@ export const allCategories: ProjectCategory[] = [
   "mobile_dev",
   "merge_web_ai",
   "merge_web_mobile",
+  "merge_mobile_ai",
   "merge_collab",
   "game_dev",
   "hcrh",
@@ -118,6 +121,9 @@ export interface Project {
   is_published: boolean;
   is_best_product?: boolean;
   best_product_rank?: number | null;
+  genre?: string;
+  screenshots?: string;
+  platforms?: string;
   members?: TeamMember[];
   created_at: string;
   updated_at: string;
@@ -160,7 +166,7 @@ export const getPublishedProjects = async (params?: { batch?: number; best_only?
   return { data: extractArray<Project>(res.data) };
 };
 
-export const getBestProducts = async (params?: { batch?: number; limit?: number }) => {
+export const getBestProducts = async (params?: { batch?: number; limit?: number; randomize?: boolean }) => {
   const res = await api.get("/api/projects/best", { params });
   return { data: extractArray<Project>(res.data) };
 };

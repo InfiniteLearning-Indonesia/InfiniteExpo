@@ -78,6 +78,8 @@ export default function ProjectForm({ id }: { id?: string }) {
     team_name: "",
     is_published: false,
     is_best_product: false,
+    genre: "",
+    platforms: "",
   });
 
   const [subFields, setSubFields] = useState({
@@ -126,6 +128,9 @@ export default function ProjectForm({ id }: { id?: string }) {
     } else if (category === "merge_web_mobile") {
       platforms.web = true;
       platforms.mobile = true;
+    } else if (category === "merge_mobile_ai") {
+      platforms.mobile = true;
+      platforms.ai = true;
     } else if (category === "merge_collab") {
       platforms.web = true;
       platforms.mobile = true;
@@ -137,6 +142,9 @@ export default function ProjectForm({ id }: { id?: string }) {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMemberInput[]>([]);
+  const [existingScreenshots, setExistingScreenshots] = useState<string[]>([]);
+  const [newScreenshotFiles, setNewScreenshotFiles] = useState<File[]>([]);
+  const [newScreenshotPreviews, setNewScreenshotPreviews] = useState<string[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -171,7 +179,20 @@ export default function ProjectForm({ id }: { id?: string }) {
           team_name: project.team_name || "",
           is_published: project.is_published || false,
           is_best_product: project.is_best_product || false,
+          genre: project.genre || "",
+          platforms: project.platforms || "",
         });
+
+        if (project.screenshots) {
+          try {
+            const parsed = JSON.parse(project.screenshots);
+            if (Array.isArray(parsed)) {
+              setExistingScreenshots(parsed);
+            }
+          } catch (e) {
+            console.error("Failed to parse screenshots JSON:", e);
+          }
+        }
 
         const demoParsed = parseDemoLinks(project.frontend_demo);
         const repoParsed = parseRepoLinks(project.repository);
@@ -298,8 +319,17 @@ export default function ProjectForm({ id }: { id?: string }) {
       setError("Product Name is required");
       return;
     }
+    const isGameDev = formData.category === "game_dev";
     if (!formData.team_name) {
-      setError("Team Name is required");
+      setError(isGameDev ? "Studio Name is required" : "Team Name is required");
+      return;
+    }
+    if (isGameDev && !formData.genre) {
+      setError("Genre is required for Game Dev projects");
+      return;
+    }
+    if (isGameDev && !formData.platforms) {
+      setError("Platforms are required for Game Dev projects");
       return;
     }
     if (teamMembers.length === 0) {
@@ -333,7 +363,7 @@ export default function ProjectForm({ id }: { id?: string }) {
       }
       if (platforms.game) {
         demoData.game_download = subFields.game_download;
-        repoData.game_repo = subFields.game_repo;
+        // GitHub repository is hidden/removed for game dev projects
       }
       if (platforms.aai) {
         repoData.aai_repo = subFields.aai_repo;
@@ -362,11 +392,20 @@ export default function ProjectForm({ id }: { id?: string }) {
       data.append("team_name", formData.team_name);
       data.append("is_published", String(formData.is_published));
       data.append("is_best_product", String(formData.is_best_product));
+      data.append("genre", formData.genre);
+      data.append("platforms", formData.platforms);
 
       data.append("team_members", JSON.stringify(teamMembers));
 
       if (thumbnailFile) {
         data.append("thumbnail", thumbnailFile);
+      }
+
+      if (isGameDev) {
+        data.append("existing_screenshots", JSON.stringify(existingScreenshots));
+        newScreenshotFiles.forEach((file) => {
+          data.append("screenshots", file);
+        });
       }
 
       if (isEditing && id) {
@@ -501,6 +540,33 @@ export default function ProjectForm({ id }: { id?: string }) {
                 </SelectContent>
               </Select>
             </div>
+
+            {formData.category === "game_dev" && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Genre *</label>
+                  <input
+                    type="text"
+                    value={formData.genre}
+                    onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
+                    placeholder="e.g. Action RPG, Platformer, Puzzle"
+                    required
+                    className="w-full px-4 py-3 rounded-2xl bg-secondary/30 border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8A3DFF]/60 focus:ring-4 focus:ring-[#8A3DFF]/10 transition-all text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Platforms *</label>
+                  <input
+                    type="text"
+                    value={formData.platforms}
+                    onChange={(e) => setFormData({ ...formData, platforms: e.target.value })}
+                    placeholder="e.g. Windows, Web, macOS"
+                    required
+                    className="w-full px-4 py-3 rounded-2xl bg-secondary/30 border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8A3DFF]/60 focus:ring-4 focus:ring-[#8A3DFF]/10 transition-all text-xs"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -523,12 +589,14 @@ export default function ProjectForm({ id }: { id?: string }) {
 
           <div className="flex flex-col gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Team Name *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                {formData.category === "game_dev" ? "Studio Name *" : "Team Name *"}
+              </label>
               <input
                 type="text"
                 value={formData.team_name}
                 onChange={(e) => setFormData({ ...formData, team_name: e.target.value })}
-                placeholder="e.g. Green Innovators"
+                placeholder={formData.category === "game_dev" ? "e.g. Bangun Studio" : "e.g. Green Innovators"}
                 required
                 className="w-full px-4 py-3 rounded-2xl bg-secondary/30 border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8A3DFF]/60 focus:ring-4 focus:ring-[#8A3DFF]/10 transition-all text-xs"
               />
@@ -726,28 +794,16 @@ export default function ProjectForm({ id }: { id?: string }) {
 
                 {/* Game Platform Fields */}
                 {platforms.game && (
-                  <>
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Game Download URL</label>
-                      <input
-                        type="url"
-                        value={subFields.game_download}
-                        onChange={(e) => setSubFields({ ...subFields, game_download: e.target.value })}
-                        placeholder="https://itch.io/game-slug or similar"
-                        className="w-full px-4 py-3 rounded-2xl bg-secondary/30 border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8A3DFF]/60 focus:ring-4 focus:ring-[#8A3DFF]/10 transition-all text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">GitHub Game Repository</label>
-                      <input
-                        type="url"
-                        value={subFields.game_repo}
-                        onChange={(e) => setSubFields({ ...subFields, game_repo: e.target.value })}
-                        placeholder="https://github.com/user/game-repo"
-                        className="w-full px-4 py-3 rounded-2xl bg-secondary/30 border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8A3DFF]/60 focus:ring-4 focus:ring-[#8A3DFF]/10 transition-all text-xs"
-                      />
-                    </div>
-                  </>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Game Download URL</label>
+                    <input
+                      type="url"
+                      value={subFields.game_download}
+                      onChange={(e) => setSubFields({ ...subFields, game_download: e.target.value })}
+                      placeholder="https://itch.io/game-slug or similar"
+                      className="w-full px-4 py-3 rounded-2xl bg-secondary/30 border border-border/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#8A3DFF]/60 focus:ring-4 focus:ring-[#8A3DFF]/10 transition-all text-xs"
+                    />
+                  </div>
                 )}
 
                 {/* AAI Platform Fields */}
@@ -825,6 +881,84 @@ export default function ProjectForm({ id }: { id?: string }) {
             </div>
           </div>
         </div>
+
+        {formData.category === "game_dev" && (
+          <div className="glass rounded-3xl p-6 border border-border/50 flex flex-col gap-6">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Gameplay Screenshots</h2>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Existing Screenshots */}
+              {existingScreenshots.map((url, idx) => (
+                <div key={`existing-${idx}`} className="group relative aspect-video rounded-2xl border border-border/60 overflow-hidden bg-secondary/20">
+                  <img src={url.startsWith("http") ? url : `http://localhost:7000${url}`} alt="Gameplay Screenshot" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setExistingScreenshots(existingScreenshots.filter((_, i) => i !== idx))}
+                      className="p-2 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors apple-press"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* New Screenshots Previews */}
+              {newScreenshotPreviews.map((preview, idx) => (
+                <div key={`new-${idx}`} className="group relative aspect-video rounded-2xl border border-border/60 overflow-hidden bg-secondary/20">
+                  <img src={preview} alt="Gameplay Screenshot Preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewScreenshotFiles(newScreenshotFiles.filter((_, i) => i !== idx));
+                        setNewScreenshotPreviews(newScreenshotPreviews.filter((_, i) => i !== idx));
+                      }}
+                      className="p-2 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors apple-press"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Upload Trigger Button if less than 10 total */}
+              {(existingScreenshots.length + newScreenshotFiles.length) < 10 && (
+                <label className="cursor-pointer aspect-video rounded-2xl border-2 border-dashed border-border/60 hover:border-[#8A3DFF]/60 flex flex-col items-center justify-center bg-secondary/10 hover:bg-secondary/20 transition-all gap-1">
+                  <Upload className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Add Screenshot</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      const allowedCount = 10 - (existingScreenshots.length + newScreenshotFiles.length);
+                      const filesToAdd = files.slice(0, allowedCount);
+                      
+                      const newFiles = [...newScreenshotFiles, ...filesToAdd];
+                      setNewScreenshotFiles(newFiles);
+
+                      const newPreviewsPromise = filesToAdd.map((file) => {
+                        return new Promise<string>((resolve) => {
+                          const reader = new FileReader();
+                          reader.onload = () => resolve(reader.result as string);
+                          reader.readAsDataURL(file);
+                        });
+                      });
+
+                      Promise.all(newPreviewsPromise).then((previews) => {
+                        setNewScreenshotPreviews([...newScreenshotPreviews, ...previews]);
+                      });
+                    }}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">PNG or JPEG, maximum 10 screenshots allowed.</p>
+          </div>
+        )}
 
         {/* Step E: Publishing */}
         <div className="glass rounded-3xl p-6 border border-border/50 flex flex-col gap-6">

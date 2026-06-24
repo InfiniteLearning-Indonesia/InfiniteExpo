@@ -19,7 +19,8 @@ import {
   Trophy,
   AlertCircle,
   Filter,
-  Code2
+  Code2,
+  User
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -64,7 +65,7 @@ const programsList: Program[] = [
     id: "mobile",
     name: "Mobile Development",
     description: "Creating native and cross-platform mobile apps for Android and iOS devices, from utility tools to dynamic services.",
-    categories: ["mobile_dev", "merge_web_mobile", "merge_collab"],
+    categories: ["mobile_dev", "merge_web_mobile", "merge_collab", "merge_mobile_ai"],
     isActive: true,
     icon: Smartphone,
     color: "from-green-500/10 to-emerald-500/10 dark:from-green-500/20 dark:to-emerald-500/20",
@@ -76,7 +77,7 @@ const programsList: Program[] = [
     id: "ai",
     name: "AI Development",
     description: "Integrating machine learning models, computer vision, natural language processing, and advanced algorithm backends.",
-    categories: ["ai_dev", "merge_web_ai", "merge_collab"],
+    categories: ["ai_dev", "merge_web_ai", "merge_collab", "merge_mobile_ai"],
     isActive: true,
     icon: Brain,
     color: "from-purple-500/10 to-violet-500/10 dark:from-purple-500/20 dark:to-violet-500/20",
@@ -493,10 +494,10 @@ function ProgramsContent() {
                               {project.members.slice(0, 4).map((member) => (
                                 <div
                                   key={member.id}
-                                  className="h-6 w-6 rounded-full border border-background bg-secondary text-[10px] font-bold flex items-center justify-center text-foreground cursor-help"
+                                  className="h-6 w-6 rounded-full border border-background bg-secondary flex items-center justify-center text-muted-foreground cursor-help"
                                   title={`${member.name} - ${member.role}`}
                                 >
-                                  {member.name.charAt(0).toUpperCase()}
+                                  <User className="w-3.5 h-3.5" />
                                 </div>
                               ))}
                               {project.members.length > 4 && (

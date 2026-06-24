@@ -16,7 +16,8 @@ import {
   Sparkles,
   GraduationCap,
   ArrowUpRight,
-  AlertCircle
+  AlertCircle,
+  User
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -48,7 +49,7 @@ export default function Home() {
     setError(null);
     try {
       const [bestRes, statsRes] = await Promise.all([
-        getBestProducts({ limit: 6 }),
+        getBestProducts({ limit: 6, randomize: true }),
         getDashboardStats(),
       ]);
       setBestProjects(bestRes.data || []);
@@ -327,8 +328,8 @@ export default function Home() {
           </div>
 
           {isLoading ? (
-            <div className="grid md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((n) => (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div key={n} className="h-80 rounded-3xl bg-muted/40 animate-pulse" />
               ))}
             </div>
@@ -384,10 +385,10 @@ export default function Home() {
                             {project.members.slice(0, 4).map((member) => (
                               <div
                                 key={member.id}
-                                className="h-6 w-6 rounded-full border border-background bg-secondary text-[10px] font-bold flex items-center justify-center text-foreground cursor-help"
+                                className="h-6 w-6 rounded-full border border-background bg-secondary flex items-center justify-center text-muted-foreground cursor-help"
                                 title={`${member.name} - ${member.role}`}
                               >
-                                {member.name.charAt(0).toUpperCase()}
+                                <User className="w-3.5 h-3.5" />
                               </div>
                             ))}
                             {project.members.length > 4 && (
