@@ -251,7 +251,7 @@ export default function ProjectForm({ id }: { id?: string }) {
           setThumbnailPreview(
             project.thumbnail.startsWith("http")
               ? project.thumbnail
-              : `http://localhost:7000${project.thumbnail}`
+              : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000"}${project.thumbnail}`
           );
         }
 
@@ -890,7 +890,7 @@ export default function ProjectForm({ id }: { id?: string }) {
               {/* Existing Screenshots */}
               {existingScreenshots.map((url, idx) => (
                 <div key={`existing-${idx}`} className="group relative aspect-video rounded-2xl border border-border/60 overflow-hidden bg-secondary/20">
-                  <img src={url.startsWith("http") ? url : `http://localhost:7000${url}`} alt="Gameplay Screenshot" className="w-full h-full object-cover" />
+                  <img src={url.startsWith("http") ? url : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000"}${url}`} alt="Gameplay Screenshot" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
                       type="button"

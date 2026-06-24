@@ -432,7 +432,7 @@ function ProgramsContent() {
                             src={
                               project.thumbnail.startsWith("http")
                                 ? project.thumbnail
-                                : `http://localhost:7000${project.thumbnail}`
+                                : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7000"}${project.thumbnail}`
                             }
                             alt={project.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
