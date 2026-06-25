@@ -20,7 +20,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  User
+  User,
+  Play
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -102,12 +103,18 @@ export default function ProjectDetailsClient({ initialProject }: ProjectDetailsC
 
   const videoEmbedUrl = getEmbedUrl(project?.showcase_video);
 
+  const [isPlayingMobile, setIsPlayingMobile] = useState(false);
+
+  const handlePlayMobile = () => {
+    setIsPlayingMobile(true);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300 overflow-x-hidden">
       <Navbar />
 
       {/* Main Container */}
-      <div className="flex-grow pt-32 pb-24 px-6 max-w-5xl mx-auto w-full">
+      <div className="flex-grow pt-32 pb-24 px-6 max-w-5xl mx-auto w-full overflow-x-hidden">
         {/* Back Link */}
         <Link
           href="/projects"
@@ -383,17 +390,128 @@ export default function ProjectDetailsClient({ initialProject }: ProjectDetailsC
               </div>
               <h2 className="text-xl font-bold tracking-tight">Project Showcase Video</h2>
             </div>
-            <div className="rounded-3xl overflow-hidden glass aspect-video w-full border border-border/50 shadow-2xl">
+            {/* Desktop Player: Responsive desktop/tablet scaling for Google Drive */}
+            <div 
+              className={`hidden sm:block rounded-3xl overflow-hidden glass w-full border border-border/50 shadow-2xl relative bg-black ${
+                project.showcase_video?.includes("drive.google.com") ? "md:aspect-video aspect-[1.2]" : "aspect-video"
+              }`}
+            >
               {videoEmbedUrl ? (
-                <iframe
-                  src={videoEmbedUrl}
-                  title="Showcase Video"
-                  className="w-full h-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                project.showcase_video?.includes("drive.google.com") ? (
+                  <div className="absolute inset-0 w-full h-full overflow-hidden">
+                    <iframe
+                      src={videoEmbedUrl}
+                      title="Showcase Video"
+                      className="absolute border-0"
+                      style={{
+                        width: "200%",
+                        height: "200%",
+                        top: 0,
+                        left: 0,
+                        transform: "scale(0.5)",
+                        transformOrigin: "top left",
+                      }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <iframe
+                    src={videoEmbedUrl}
+                    title="Showcase Video"
+                    className="absolute inset-0 w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )
               ) : (
-                <video src={project.showcase_video} controls className="w-full h-full object-cover" />
+                <video src={project.showcase_video} controls className="absolute inset-0 w-full h-full object-cover" />
+              )}
+            </div>
+
+            {/* Mobile Player: Premium Interactive Click-to-Play Card / Inline player */}
+            <div className="block sm:hidden">
+              {isPlayingMobile ? (
+                <div 
+                  className={`rounded-3xl overflow-hidden glass w-full border border-border/50 shadow-2xl relative bg-black ${
+                    project.showcase_video?.includes("drive.google.com") ? "md:aspect-video aspect-[1.2]" : "aspect-video"
+                  }`}
+                >
+                  {videoEmbedUrl ? (
+                    project.showcase_video?.includes("drive.google.com") ? (
+                      <div className="absolute inset-0 w-full h-full overflow-hidden">
+                        <iframe
+                          src={`${videoEmbedUrl}${videoEmbedUrl.includes("?") ? "&" : "?"}autoplay=1`}
+                          title="Showcase Video"
+                          className="absolute border-0"
+                          style={{
+                            width: "200%",
+                            height: "200%",
+                            top: 0,
+                            left: 0,
+                            transform: "scale(0.5)",
+                            transformOrigin: "top left",
+                          }}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : (
+                      <iframe
+                        src={`${videoEmbedUrl}${videoEmbedUrl.includes("?") ? "&" : "?"}autoplay=1`}
+                        title="Showcase Video"
+                        className="absolute inset-0 w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    )
+                  ) : (
+                    <video 
+                      src={project.showcase_video} 
+                      controls 
+                      className="absolute inset-0 w-full h-full object-contain bg-black"
+                      playsInline
+                      autoPlay
+                    />
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={handlePlayMobile}
+                  className="w-full text-left block rounded-3xl overflow-hidden glass aspect-video border border-border/50 shadow-2xl relative group cursor-pointer active:scale-[0.98] transition-all duration-300"
+                >
+                  {/* Background Image (using project thumbnail) */}
+                  {project.thumbnail ? (
+                    <Image
+                      src={
+                        project.thumbnail.startsWith("http")
+                          ? project.thumbnail
+                          : `${process.env.NEXT_PUBLIC_API_URL || "https://api-exhibition.infinitelearningstudent.id"}${project.thumbnail}`
+                      }
+                      alt={project.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-secondary flex items-center justify-center">
+                      <Rocket className="w-12 h-12 text-muted-foreground/30" />
+                    </div>
+                  )}
+                  
+                  {/* Dark Overlay */}
+                  <div className="absolute inset-0 bg-black/55 group-hover:bg-black/60 transition-colors" />
+
+                  {/* Play Button & Text */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <div className="w-14 h-14 rounded-full bg-[#8A3DFF] text-white flex items-center justify-center shadow-lg shadow-[#8A3DFF]/30 group-hover:scale-110 group-active:scale-95 transition-all duration-300 animate-pulse-slow">
+                      <Play className="w-6 h-6 fill-current ml-1" />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white bg-black/60 px-4 py-2 rounded-full border border-white/10 backdrop-blur-sm">
+                      Tap to Play
+                    </span>
+                  </div>
+                </button>
               )}
             </div>
           </div>
